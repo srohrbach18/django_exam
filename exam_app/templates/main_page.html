@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Dashboard</title>
+</head>
+<body>
+    <div id='wrap'>
+        <nav>
+            <h3>Hi {{request.session.greeting}}!</h3>
+            <a href="/logout" role="button" class="btn btn-sm btn-info ml-2 text-white">Logout</a>
+        </nav>
+        <div id='write'>
+            <div class="list">
+                <h3>Here are the organizations you may join:</h3>
+                {% for group in all_groups %}
+                {% if this_user in group.joined_by.all %}
+                <div class="container">
+                    <h5><a href="/groups/{{group.id}}">{{group.org_name}}</a></h5>
+                    {% if group.creator.id == request.session.user_id %}
+                    <a href="/delete/{{group.id}}"role="button" class="btn btn-sm btn-info ml-2 text-white">Delete</a>
+                    {% endif %}
+                    <p>Members: {{ group.joined_by.count }}</p>
+                    <p>{{group.desc}}</p>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% for group in all_groups %}
+                {% if this_user not in group.joined_by.all %}
+                <div class="container">
+                    <h5><a href="/groups/{{group.id}}">{{group.org_name}}</a></h5>
+                    <p>Members: {{ group.joined_by.count }}</p>
+                    <p>{{group.desc}}</p>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="create">
+                {% if messages %}
+                <ul class="messages">    
+                    {% for message in messages %}    
+                    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>    
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <h1>Create a new organization:</h1>
+                <form action="groups/create" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="org_name">Organizations Name:</label>
+                        <input type="text" name="org_name" id="org_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc">Description</label>
+                        <textarea name="desc" id="desc" class="form-control"></textarea>
+                    </div>
+                    <button class="btn button btn-primary">Create</button>
+                </form>        
+            </div>
+        </div>        
+    </div>
+</body>
+</html>
